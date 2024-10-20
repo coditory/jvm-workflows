@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description: Branch name to release
+        required: true
+        default: main
+      section:
+        type: choice
+        description: Version section to increment
+        options:
+          - patch
+          - minor
+          - major
+        required: true
+        default: patch
+      version:
+        type: string
+        description: |
+          ...or manually define version like 1.2.3, 1.2.3-suffix
+        required: false
+      snapshot:
+        type: boolean
+        description: Use snapshot repository
+        required: true
+        default: false
+  # called by release-auto
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        required: false
+        default: 'main'
+      section:
+        type: string
+        required: false
+        default: 'patch'
+      version:
+        type: string
+        required: false
+
+jobs:
+  release:
+    uses: coditory/workflows/.github/workflows/release.yml@v1
+    secrets: inherit
+    with:
+      branch: ${{ inputs.branch }}
+      section: ${{ inputs.section }}
+      version: ${{ inputs.version }}
+      release-command: echo "Simulating release publish to maven central..."
+      snapshot-command: echo "Simulating snapshot publish to maven central..."
