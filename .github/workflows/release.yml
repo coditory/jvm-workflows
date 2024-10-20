@@ -28,7 +28,7 @@ on:
         default: ./gradlew publishToSonatype -Pversion=%NEXT_VERSION%
 
 jobs:
-  release:
+  coditory-jvm-release:
     uses: coditory/workflows/.github/workflows/release.yml@v1
     secrets: inherit
     with:

@@ -34,7 +34,7 @@ on:
         default: ./gradlew publishToSonatype -Pversion=%NEXT_VERSION%
 
 jobs:
-  build:
+  coditory-jvm-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Skip duplicate build on pull_request if pull request uses branch from the same repository
