@@ -18,6 +18,10 @@ on:
         type: string
         required: false
         default: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=%NEXT_VERSION%
+      snapshot:
+        type: boolean
+        required: false
+        default: false
       snapshot-command:
         type: string
         required: false
@@ -31,5 +35,6 @@ jobs:
       branch: ${{ inputs.branch }}
       section: ${{ inputs.section }}
       version: ${{ inputs.version }}
+      snapshot: ${{ inputs.snapshot }}
       release-command: echo "Simulating %NEXT_VERSION% release publish to maven central..."
       snapshot-command: echo "Simulating %NEXT_VERSION% snapshot publish to maven central..."
