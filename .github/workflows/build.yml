@@ -7,10 +7,6 @@ on:
         type: string
         required: false
         default: 21
-      publish-snapshot:
-        type: boolean
-        required: false
-        default: true
       build-command:
         type: string
         required: false
@@ -28,6 +24,14 @@ on:
           ^.github/.*\.md
           ^docs/.*
           ^gradle.properties
+      publish-snapshot:
+        type: boolean
+        required: false
+        default: true
+      snapshot-command:
+        type: string
+        required: false
+        default: ./gradlew publishToSonatype -Pversion=%NEXT_VERSION%
 
 jobs:
   build:

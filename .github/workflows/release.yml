@@ -1,33 +1,6 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        type: string
-        description: Branch name to release
-        required: true
-        default: main
-      section:
-        type: choice
-        description: Version section to increment
-        options:
-          - patch
-          - minor
-          - major
-        required: true
-        default: patch
-      version:
-        type: string
-        description: |
-          ...or manually define version like 1.2.3, 1.2.3-suffix
-        required: false
-      snapshot:
-        type: boolean
-        description: Use snapshot repository
-        required: true
-        default: false
-  # called by release-auto
   workflow_call:
     inputs:
       branch:
@@ -41,6 +14,12 @@ on:
       version:
         type: string
         required: false
+      release-command:
+        type: string
+        default: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=%NEXT_VERSION%
+      snapshot-command:
+        type: string
+        default: ./gradlew publishToSonatype -Pversion=%NEXT_VERSION%
 
 jobs:
   release:
@@ -50,5 +29,5 @@ jobs:
       branch: ${{ inputs.branch }}
       section: ${{ inputs.section }}
       version: ${{ inputs.version }}
-      release-command: echo "Simulating release publish to maven central..."
-      snapshot-command: echo "Simulating snapshot publish to maven central..."
+      release-command: echo "Simulating %NEXT_VERSION% release publish to maven central..."
+      snapshot-command: echo "Simulating %NEXT_VERSION% snapshot publish to maven central..."
