@@ -16,9 +16,11 @@ on:
         required: false
       release-command:
         type: string
+        required: false
         default: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=%NEXT_VERSION%
       snapshot-command:
         type: string
+        required: false
         default: ./gradlew publishToSonatype -Pversion=%NEXT_VERSION%
 
 jobs:
