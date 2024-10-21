@@ -12,7 +12,7 @@ on:
       coverage-files:
         type: string
         required: false
-        default: build/reports/kover/report.xml
+        default: build/reports/kover/report.xml,build/reports/jacoco/coverage/coverage.xml
       skip-files:
         type: string
         required: false
