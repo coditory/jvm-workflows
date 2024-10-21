@@ -5,12 +5,10 @@ on:
     inputs:
       java-version:
         type: string
-        required: false
-        default: 21
+        required: true
       build-command:
         type: string
-        required: false
-        default: ./gradlew build coverage
+        required: true
       coverage-files:
         type: string
         required: false
@@ -24,14 +22,9 @@ on:
           ^.github/.*\.md
           ^docs/.*
           ^gradle.properties
-      snapshot:
-        type: boolean
-        required: false
-        default: true
       snapshot-command:
         type: string
         required: false
-        default: ./gradlew publishToSonatype -Pversion=%NEXT_VERSION%
 
 jobs:
   coditory-jvm-build:
