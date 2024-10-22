@@ -6,6 +6,10 @@ on:
       java-version:
         type: string
         required: true
+      java-distribution:
+        type: string
+        required: false
+        default: 'temurin'
       build-command:
         type: string
         required: true
@@ -52,7 +56,7 @@ jobs:
         if: steps.skipper.outputs.skip != 'true'
         with:
           java-version: ${{ inputs.java-version }}
-          distribution: temurin
+          distribution: ${{ inputs.java-distribution }}
 
       - name: Validate gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
