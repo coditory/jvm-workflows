@@ -133,7 +133,7 @@ jobs:
           declare -r PR_URL="$(gh pr create \
             -B "$BASE_BRANCH" -H "$HEAD_BRANCH" \
             --title "Update gradle wrapper to $VERSION-$DISTRO" \
-            --body "Upgrade gradle wrapper:\n$PREV_VERSION-$PREV_DISTRO -> $VERSION-$DISTRO")"
+            --body "Upgrade gradle wrapper: $PREV_VERSION-$PREV_DISTRO -> $VERSION-$DISTRO")"
           echo "url=$PR_URL" | tee -a $GITHUB_OUTPUT
 
       - name: Enable PR auto-merge
