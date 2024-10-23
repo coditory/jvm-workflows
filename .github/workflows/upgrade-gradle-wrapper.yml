@@ -75,7 +75,7 @@ jobs:
           UPGRADE_DISTRO: ${{ inputs.gradle-distribution || steps.current.output.distribution || 'bin' }}
         run: |
           ./gradlew wrapper --gradle-version latest --distribution-type="${UPGRADE_DISTRO}"
-          declare -r DASHED="$(echo "$PROPS" | grep "distributionUrl=" | sed -e 's|.*/gradle-||' -e 's|\.[^.]*$||')"
+          declare -r DASHED="$(cat "$PROPS_FILE" | grep "distributionUrl=" | sed -e 's|.*/gradle-||' -e 's|\.[^.]*$||')"
           declare -r VERSION="$(echo "$DASHED" | cut -d- -f1)"
           declare -r DISTRO="$(echo "$DASHED" | cut -d- -f2)"
           echo ""
