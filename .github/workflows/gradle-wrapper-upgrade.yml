@@ -1,0 +1,148 @@
+name: Gradle wrapper upgrade
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: 'Java version'
+        type: string
+        required: true
+      java-distribution:
+        description: 'Java distribution'
+        type: string
+        required: false
+        default: temurin
+      gradle-distribution:
+        description: 'Gradle distribution. Default upgrade ditribution is the current distribution.'
+        type: string
+        required: false
+
+jobs:
+  coditory-jvm-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Setup bot token
+        uses: actions/create-github-app-token@v1
+        id: bot
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - name: Configure bot git account
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+        run: |
+          USER_ID="$(gh api "/users/${{ steps.bot.outputs.app-slug }}[bot]" --jq .id)"
+          USER_EMAIL="$USER_ID+${{ steps.bot.outputs.app-slug }}[bot]@users.noreply.github.com"
+          USER_NAME="${{ steps.bot.outputs.app-slug }}[bot]"
+          git config --global user.name "$USER_NAME"
+          git config --global user.email "$USER_EMAIL"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.bot.outputs.token }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: ${{ inputs.java-distribution }}
+
+      - name: Current version
+        id: current
+        run: |
+          declare -r PROPS_FILE="./gradle/wrapper/gradle-wrapper.propertes"
+          if [ -f "$PROPS_FILE" ]; then
+            # Sample line with distriubtionUrl:
+            # distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+            declare -r DASHED="$(echo "$PROPS" | grep "distributionUrl=" | sed -e 's|.*/gradle-||' -e 's|\.[^.]*$||')"
+            declare -r VERSION="$(echo "$DASHED" | cut -d- -f1)"
+            declare -r DISTRIBUTION="$(echo "$DASHED" | cut -d- -f2)"
+            echo ""
+            echo "version=$VERSION" | tee -a $GITHUB_OUTPUT
+            echo "distribution=$DISTRIBUTION" | tee -a $GITHUB_OUTPUT
+          else
+            echo "Missing file $PROPS_FILE"
+          fi
+
+      - name: Upgrade Gradle
+        id: upgrade
+        env:
+          CURRENT_VERSION: ${{ steps.current.output.version }}
+          CURRENT_DISTRO: ${{ steps.current.output.distribution }}
+          UPGRADE_DISTRO: ${{ inputs.gradle-distribution || steps.current.output.distribution || 'bin' }}
+        run: |
+          ./gradlew wrapper --gradle-version latest --gradle-distribution="${UPGRADE_DISTRO}"
+          declare -r PROPS_FILE="./gradle/wrapper/gradle-wrapper.propertes"
+          declare -r DASHED="$(echo "$PROPS" | grep "distributionUrl=" | sed -e 's|.*/gradle-||' -e 's|\.[^.]*$||')"
+          declare -r VERSION="$(echo "$DASHED" | cut -d- -f1)"
+          declare -r DISTRO="$(echo "$DASHED" | cut -d- -f2)"
+          echo ""
+          echo "version=$VERSION" | tee -a $GITHUB_OUTPUT
+          echo "distribution=$DISTRO" | tee -a $GITHUB_OUTPUT
+          if [ "$CURRENT_VERSION" == "$VERSION" ] && [ "$CURRENT_DISTRO" == "$DISTRO" ]; then
+            echo "upgraded=false" | tee -a $GITHUB_OUTPUT
+            echo "### No new gradle wrapper version available $VERSION ($DISTRO)" >> $GITHUB_STEP_SUMMARY
+            echo "No new gradle wrapper version available. Current version: $VERSION ($DISTRO)"
+          else
+            echo "upgraded=true" | tee -a $GITHUB_OUTPUT
+            echo "Updating gradle wrapper version $VERSION ($DISTRO) using branch $BRANCH"
+            echo "### Updating gradle wrapper version: $CURRENT_VERSION ($CURRENT_DISTRO) -> $VERSION ($DISTRO)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Validate gradle wrapper
+        id: validate
+        if: steps.upgrade.outputs.upgraded == 'true'
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Push branch
+        id: push
+        if: steps.validate.conclusion == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.upgrade.outputs.version }}
+          DISTRO: ${{ steps.upgrade.outputs.distribution }}
+        run: |
+          declare -r BRANCH="bot/upgradle-gradle-wrapper"
+          git branch -D "$BRANCH" 2>/dev/null || true
+          git push origin --delete "$BRANCH" 2>/dev/null || true
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -A -m "Upgrade gradle wrapper to version $VERSION ($DISTRO)"
+          git push origin "$BRANCH"
+          echo "branch=$BRANCH" | tee -a $GITHUB_OUTPUT
+
+      - name: Create pull request
+        id: pr
+        if: steps.push.conclusion == 'success'
+        env:
+          HEAD_BRANCH: ${{ github.event.repository.default_branch }}
+          BASE_BRANCH: ${{ steps.push.outputs.branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.upgrade.outputs.version }}
+          DISTRO: ${{ steps.upgrade.outputs.distribution }}
+          PREV_VERSION: ${{ steps.current.output.version }}
+          PREV_DISTRO: ${{ steps.current.output.distribution }}
+        run: |
+          decalre -r URL="(gh pr create \
+            -B "$BASE_BRANCH" -H "$HEAD_BRANCH" \
+            --title "Update gradle wrapper to $VERSION ($DISTRO)" \
+            --body "Upgrade gradle wrapper:\n$PREV_VERSION ($PREV_DISTRO) -> $VERSION ($DISTRO)")"
+          echo "url=$URL" | tee -a $GITHUB_OUTPUT
+
+      - name: Enable PR auto-merge
+        if: steps.pr.conclusion == 'success'
+        env:
+          PR_URL: ${{ steps.pr.outputs.url }}
+          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
+        run: gh pr merge --auto --rebase "$PR_URL"
+
+      - name: Approve PR
+        if: steps.pr.conclusion == 'success'
+        env:
+          PR_URL: ${{ steps.pr.outputs.url }}
+          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
+        run: gh pr review $PR_URL --approve --body "Auto approving gradle wrapper upgrade"
+
