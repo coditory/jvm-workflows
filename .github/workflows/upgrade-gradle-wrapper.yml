@@ -87,7 +87,7 @@ jobs:
             echo "No new gradle wrapper version available. Current version: $VERSION ($DISTRO)"
           else
             echo "upgraded=true" | tee -a $GITHUB_OUTPUT
-            echo "Updating gradle wrapper version $VERSION ($DISTRO) using branch $BRANCH"
+            echo "Updating gradle wrapper version $VERSION ($DISTRO)"
             echo "### Updating gradle wrapper version: $CURRENT_VERSION ($CURRENT_DISTRO) -> $VERSION ($DISTRO)" >> $GITHUB_STEP_SUMMARY
           fi
 
@@ -109,7 +109,7 @@ jobs:
           git push origin --delete "$BRANCH" 2>/dev/null || true
           git checkout -b "$BRANCH"
           git add -A
-          git commit -A -m "Upgrade gradle wrapper to version $VERSION ($DISTRO)"
+          git commit -a -m "Upgrade gradle wrapper to version $VERSION ($DISTRO)"
           git push origin "$BRANCH"
           echo "branch=$BRANCH" | tee -a $GITHUB_OUTPUT
 
@@ -125,11 +125,11 @@ jobs:
           PREV_VERSION: ${{ steps.current.outputs.version }}
           PREV_DISTRO: ${{ steps.current.outputs.distribution }}
         run: |
-          decalre -r URL="(gh pr create \
+          decalre -r PR_URL="(gh pr create \
             -B "$BASE_BRANCH" -H "$HEAD_BRANCH" \
             --title "Update gradle wrapper to $VERSION ($DISTRO)" \
             --body "Upgrade gradle wrapper:\n$PREV_VERSION ($PREV_DISTRO) -> $VERSION ($DISTRO)")"
-          echo "url=$URL" | tee -a $GITHUB_OUTPUT
+          echo "url=$PR_URL" | tee -a $GITHUB_OUTPUT
 
       - name: Enable PR auto-merge
         if: steps.pr.conclusion == 'success'
