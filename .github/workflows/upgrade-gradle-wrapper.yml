@@ -128,7 +128,7 @@ jobs:
           PREV_VERSION: ${{ steps.current.outputs.version }}
           PREV_DISTRO: ${{ steps.current.outputs.distribution }}
         run: |
-          declare -r PR_URL="(gh pr create \
+          declare -r PR_URL="$(gh pr create \
             -B "$BASE_BRANCH" -H "$HEAD_BRANCH" \
             --title "Update gradle wrapper to $VERSION-$DISTRO" \
             --body "Upgrade gradle wrapper:\n$PREV_VERSION-$PREV_DISTRO -> $VERSION-$DISTRO")"
