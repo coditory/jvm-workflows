@@ -18,7 +18,7 @@ on:
         required: false
 
 jobs:
-  coditory-jvm-build:
+  coditory-upgrade-gradle-wrapper:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -69,10 +69,10 @@ jobs:
       - name: Upgrade Gradle
         id: upgrade
         env:
-          CURRENT_VERSION: ${{ steps.current.output.version }}
-          CURRENT_DISTRO: ${{ steps.current.output.distribution }}
-          PROPS_FILE: ${{ steps.current.output.file }}
-          UPGRADE_DISTRO: ${{ inputs.gradle-distribution || steps.current.output.distribution || 'bin' }}
+          CURRENT_VERSION: ${{ steps.current.outputs.version }}
+          CURRENT_DISTRO: ${{ steps.current.outputs.distribution }}
+          PROPS_FILE: ${{ steps.current.outputs.file }}
+          UPGRADE_DISTRO: ${{ inputs.gradle-distribution || steps.current.outputs.distribution || 'bin' }}
         run: |
           ./gradlew wrapper --gradle-version latest --distribution-type="${UPGRADE_DISTRO}"
           declare -r DASHED="$(cat "$PROPS_FILE" | grep "distributionUrl=" | sed -e 's|.*/gradle-||' -e 's|\.[^.]*$||')"
@@ -122,8 +122,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.upgrade.outputs.version }}
           DISTRO: ${{ steps.upgrade.outputs.distribution }}
-          PREV_VERSION: ${{ steps.current.output.version }}
-          PREV_DISTRO: ${{ steps.current.output.distribution }}
+          PREV_VERSION: ${{ steps.current.outputs.version }}
+          PREV_DISTRO: ${{ steps.current.outputs.distribution }}
         run: |
           decalre -r URL="(gh pr create \
             -B "$BASE_BRANCH" -H "$HEAD_BRANCH" \
