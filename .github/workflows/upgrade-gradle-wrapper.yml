@@ -145,6 +145,8 @@ jobs:
         if: steps.pr.conclusion == 'success'
         env:
           PR_URL: ${{ steps.pr.outputs.url }}
-          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Approver cannot be the same as approver
+          # GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
         run: gh pr review $PR_URL --approve --body "Auto approving gradle wrapper upgrade"
 
