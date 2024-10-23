@@ -54,7 +54,7 @@ jobs:
       - name: Current version
         id: current
         run: |
-          declare -r PROPS_FILE="./gradle/wrapper/gradle-wrapper.propertes"
+          declare -r PROPS_FILE="./gradle/wrapper/gradle-wrapper.properties"
           if [ -f "$PROPS_FILE" ]; then
             # Sample line with distriubtionUrl:
             # distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -64,6 +64,7 @@ jobs:
             echo ""
             echo "version=$VERSION" | tee -a $GITHUB_OUTPUT
             echo "distribution=$DISTRIBUTION" | tee -a $GITHUB_OUTPUT
+            echo "file=$PROPS_FILE" | tee -a $GITHUB_OUTPUT
           else
             echo "Missing file $PROPS_FILE"
           fi
@@ -73,10 +74,10 @@ jobs:
         env:
           CURRENT_VERSION: ${{ steps.current.output.version }}
           CURRENT_DISTRO: ${{ steps.current.output.distribution }}
+          PROPS_FILE: ${{ steps.current.output.file }}
           UPGRADE_DISTRO: ${{ inputs.gradle-distribution || steps.current.output.distribution || 'bin' }}
         run: |
-          ./gradlew wrapper --gradle-version latest --gradle-distribution="${UPGRADE_DISTRO}"
-          declare -r PROPS_FILE="./gradle/wrapper/gradle-wrapper.propertes"
+          ./gradlew wrapper --gradle-version latest --distribution-type="${UPGRADE_DISTRO}"
           declare -r DASHED="$(echo "$PROPS" | grep "distributionUrl=" | sed -e 's|.*/gradle-||' -e 's|\.[^.]*$||')"
           declare -r VERSION="$(echo "$DASHED" | cut -d- -f1)"
           declare -r DISTRO="$(echo "$DASHED" | cut -d- -f2)"
