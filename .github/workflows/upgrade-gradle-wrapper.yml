@@ -6,7 +6,7 @@ on:
       java-version:
         description: 'Java version'
         type: string
-        required: true
+        required: false
       java-distribution:
         description: 'Java distribution'
         type: string
@@ -46,6 +46,7 @@ jobs:
 
       - name: Setup JDK
         uses: actions/setup-java@v4
+        if: inputs.java-version != ''
         with:
           java-version: ${{ inputs.java-version }}
           distribution: ${{ inputs.java-distribution }}
