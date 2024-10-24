@@ -126,9 +126,7 @@ jobs:
           DISTRO: ${{ steps.upgrade.outputs.distribution }}
           PREV_VERSION: ${{ steps.current.outputs.version }}
           PREV_DISTRO: ${{ steps.current.outputs.distribution }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Approver cannot be the same as approver
-          # GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
         run: |
           declare -r PR_URL="$(gh pr create \
             -B "$BASE_BRANCH" -H "$HEAD_BRANCH" \
@@ -143,10 +141,18 @@ jobs:
           GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
         run: gh pr merge --auto --rebase "$PR_URL"
 
+      - name: Setup reviewer bot token
+        uses: actions/create-github-app-token@v1
+        id: reviewer-bot
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+
       - name: Approve PR
         if: steps.pr.conclusion == 'success'
         env:
           PR_URL: ${{ steps.pr.outputs.url }}
-          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.reviewer-bot.outputs.token }}
         run: gh pr review $PR_URL --approve --body "Auto approving gradle wrapper upgrade"
 
