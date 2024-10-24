@@ -134,19 +134,19 @@ jobs:
             --body "Upgrade gradle wrapper: $PREV_VERSION-$PREV_DISTRO -> $VERSION-$DISTRO")"
           echo "url=$PR_URL" | tee -a $GITHUB_OUTPUT
 
-      - name: Enable PR auto-merge
-        if: steps.pr.conclusion == 'success'
-        env:
-          PR_URL: ${{ steps.pr.outputs.url }}
-          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
-        run: gh pr merge --auto --rebase "$PR_URL"
-
       - name: Setup reviewer bot token
         uses: actions/create-github-app-token@v1
         id: reviewer-bot
         with:
           app-id: ${{ secrets.REVIEWER_BOT_APP_ID }}
           private-key: ${{ secrets.REVIEWER_BOT_PRIVATE_KEY }}
+
+      - name: Enable PR auto-merge
+        if: steps.pr.conclusion == 'success'
+        env:
+          PR_URL: ${{ steps.pr.outputs.url }}
+          GITHUB_TOKEN: ${{ steps.bot-reviewer.outputs.token }}
+        run: gh pr merge --auto --rebase "$PR_URL"
 
       - name: Approve PR
         if: steps.pr.conclusion == 'success'
