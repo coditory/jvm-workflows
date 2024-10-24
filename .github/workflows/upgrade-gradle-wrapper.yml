@@ -142,17 +142,17 @@ jobs:
           app-id: ${{ secrets.REVIEWER_BOT_APP_ID }}
           private-key: ${{ secrets.REVIEWER_BOT_PRIVATE_KEY }}
 
-      - name: Enable PR auto-merge
-        if: steps.pr.conclusion == 'success'
-        env:
-          PR_URL: ${{ steps.pr.outputs.url }}
-          GITHUB_TOKEN: ${{ steps.reviewer.outputs.token }}
-        run: gh pr merge --auto --rebase "$PR_URL"
-
       - name: Approve PR
         if: steps.pr.conclusion == 'success'
         env:
           PR_URL: ${{ steps.pr.outputs.url }}
           GITHUB_TOKEN: ${{ steps.reviewer.outputs.token }}
         run: gh pr review $PR_URL --approve --body "Auto approving gradle wrapper upgrade"
+
+      - name: Enable PR auto-merge
+        if: steps.pr.conclusion == 'success'
+        env:
+          PR_URL: ${{ steps.pr.outputs.url }}
+          GITHUB_TOKEN: ${{ steps.reviewer.outputs.token }}
+        run: gh pr merge --auto --rebase "$PR_URL"
 
