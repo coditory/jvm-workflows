@@ -136,7 +136,8 @@ jobs:
 
       - name: Setup reviewer bot token
         uses: actions/create-github-app-token@v1
-        id: reviewer-bot
+        id: reviewer
+        if: steps.pr.conclusion == 'success'
         with:
           app-id: ${{ secrets.REVIEWER_BOT_APP_ID }}
           private-key: ${{ secrets.REVIEWER_BOT_PRIVATE_KEY }}
@@ -145,13 +146,13 @@ jobs:
         if: steps.pr.conclusion == 'success'
         env:
           PR_URL: ${{ steps.pr.outputs.url }}
-          GITHUB_TOKEN: ${{ steps.bot-reviewer.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.reviewer.outputs.token }}
         run: gh pr merge --auto --rebase "$PR_URL"
 
       - name: Approve PR
         if: steps.pr.conclusion == 'success'
         env:
           PR_URL: ${{ steps.pr.outputs.url }}
-          GITHUB_TOKEN: ${{ steps.reviewer-bot.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.reviewer.outputs.token }}
         run: gh pr review $PR_URL --approve --body "Auto approving gradle wrapper upgrade"
 
