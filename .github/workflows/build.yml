@@ -77,6 +77,7 @@ jobs:
 
       - name: Publish Coverage Report
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         # Publish coverage only for the default branch
         if: |
           steps.skipper.outputs.skip != 'true'
