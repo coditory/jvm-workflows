@@ -73,7 +73,7 @@ jobs:
 
       - name: Build
         if: steps.skipper.outputs.skip != 'true'
-        run: ${{ inputs.build-command }}
+        run: eval "${{ inputs.build-command }}"
 
       - name: Publish Coverage Report
         uses: codecov/codecov-action@v4
@@ -108,7 +108,11 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           NEXT_VERSION: ${{ steps.version.outputs.next_version }}
+          SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          OSSRH_STAGING_PROFILE_ID: ${{ secrets.OSSRH_STAGING_PROFILE_ID }}
         run: |
-          declare -r cmd="$(echo "${{ inputs.snapshot-command }}" | sed -s "s|%NEXT_VERSION%|$NEXT_VERSION|")"
-          $cmd
+          eval "${{ inputs.snapshot-command }}"
           echo "### Published snapshot version $NEXT_VERSION 🚀" | tee -a $GITHUB_STEP_SUMMARY
