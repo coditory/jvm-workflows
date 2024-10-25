@@ -73,7 +73,7 @@ jobs:
 
       - name: Build
         if: steps.skipper.outputs.skip != 'true'
-        run: eval "${{ inputs.build-command }}"
+        run: ${{ inputs.build-command }}
 
       - name: Publish Coverage Report
         uses: codecov/codecov-action@v4
@@ -114,5 +114,5 @@ jobs:
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           OSSRH_STAGING_PROFILE_ID: ${{ secrets.OSSRH_STAGING_PROFILE_ID }}
         run: |
-          eval "${{ inputs.snapshot-command }}"
-          echo "### Published snapshot version $NEXT_VERSION 🚀" | tee -a $GITHUB_STEP_SUMMARY
+          ${{ inputs.snapshot-command }}
+          echo "Published snapshot version $NEXT_VERSION 🚀" | tee -a $GITHUB_STEP_SUMMARY

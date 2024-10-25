@@ -86,12 +86,10 @@ jobs:
           echo "distribution=$DISTRO" | tee -a $GITHUB_OUTPUT
           if [ "$CURRENT_VERSION" == "$VERSION" ] && [ "$CURRENT_DISTRO" == "$DISTRO" ]; then
             echo "upgraded=false" | tee -a $GITHUB_OUTPUT
-            echo "### No new gradle wrapper version available $VERSION-$DISTRO" >> $GITHUB_STEP_SUMMARY
-            echo "No new gradle wrapper version available. Current version: $VERSION-$DISTRO"
+            echo "No new gradle wrapper version available $VERSION-$DISTRO" | tee -a $GITHUB_STEP_SUMMARY
           else
             echo "upgraded=true" | tee -a $GITHUB_OUTPUT
-            echo "Updating gradle wrapper version $VERSION-$DISTRO"
-            echo "### Updating gradle wrapper version: $CURRENT_VERSION-$CURRENT_DISTRO -> $VERSION-$DISTRO" >> $GITHUB_STEP_SUMMARY
+            echo "Updating gradle wrapper version: $CURRENT_VERSION-$CURRENT_DISTRO -> $VERSION-$DISTRO" | tee -a $GITHUB_STEP_SUMMARY
           fi
 
       - name: Validate gradle wrapper
