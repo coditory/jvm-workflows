@@ -8,6 +8,13 @@ on:
         type: boolean
         required: false
         default: false
+      java-version:
+        type: string
+        required: true
+      java-distribution:
+        type: string
+        required: false
+        default: 'temurin'
       version-command:
         description: 'Command that prints out version seen by the build tool'
         type: 'string'
@@ -68,8 +75,8 @@ jobs:
       - name: Compare
         if: steps.skipper.outputs.skip != 'true'
         env:
-          PROJECT_VERSION: ${{ job.project.outputs.version }}
-          GIT_VERSION: ${{ jobs.git.outputs.version }}
+          PROJECT_VERSION: ${{ steps.project.outputs.version }}
+          GIT_VERSION: ${{ steps.git.outputs.version }}
         run: |
           if [ "$PROJECT_VERSION" == "$GIT_VERSION" ]; then
             echo "Project and git versions matches. All is good!" | tee -a $GITHUB_STEP_SUMMARY
