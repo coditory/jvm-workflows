@@ -22,7 +22,7 @@ on:
         default: './gradlew version --quiet'
 
 jobs:
-  coditory-jvm-version-check:
+  coditory-version-check:
     runs-on: ubuntu-latest
     steps:
       - name: Context
@@ -36,7 +36,8 @@ jobs:
         if: steps.skipper.outputs.skip != 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 100
+          # parsing version from git tags requires full history
+          fetch-depth: 0
 
       - name: Skip if not needed
         id: skipper

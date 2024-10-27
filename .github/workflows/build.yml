@@ -32,7 +32,7 @@ on:
         default: false
 
 jobs:
-  coditory-jvm-build:
+  coditory-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
