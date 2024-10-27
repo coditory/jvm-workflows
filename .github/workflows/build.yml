@@ -52,6 +52,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # required at least two commits for proper working of the skip job
+          fetch-depth: 2
 
       - name: Skip build if not needed
         id: skipper
