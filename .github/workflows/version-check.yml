@@ -1,0 +1,81 @@
+name: Version check
+
+on:
+  workflow_call:
+    inputs:
+      debug:
+        description: 'Print debug info'
+        type: boolean
+        required: false
+        default: false
+      version-command:
+        description: 'Command that prints out version seen by the build tool'
+        type: 'string'
+        required: false
+        default: './gradlew version --quiet'
+
+jobs:
+  coditory-jvm-version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Context
+        if: inputs.debug
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Skip build if not needed
+        id: skipper
+        uses: coditory/skip-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          skip-commit-messages: '[ci-skip-build]'
+          files: gradle.properties
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: steps.skipper.outputs.skip != 'true'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        if: steps.skipper.outputs.skip != 'true'
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: ${{ inputs.java-distribution }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        if: steps.skipper.outputs.skip != 'true'
+
+      - name: Project version
+        id: project
+        if: steps.skipper.outputs.skip != 'true'
+        run: |
+          declare -r versionCmd="${{ inputs.version-command }}"
+          echo "Using command to get project version:\n$versionCmd"
+          declare -r version="$($cmd)"
+          echo "version=$version" | tee -a $GITHUB_OUTPUT
+
+      - name: Git version
+        id: git
+        if: steps.skipper.outputs.skip != 'true'
+        uses: coditory/version-action@v1
+
+      - name: Compare
+        if: steps.skipper.outputs.skip != 'true'
+        env:
+          PROJECT_VERSION: ${{ job.project.outputs.version }}
+          GIT_VERSION: ${{ jobs.git.outputs.version }}
+        run: |
+          if [ "$PROJECT_VERSION" == "$GIT_VERSION" ]; then
+            echo "Project and git versions matches. All is good!" | tee -a $GITHUB_STEP_SUMMARY
+          else
+            echo "Error: Project and git versions do not match." | tee -a $GITHUB_STEP_SUMMARY
+            echo "Project version: $PROJECT_VERSION" | tee -a $GITHUB_STEP_SUMMARY
+            echo "Git version: $GIT_VERSION" | tee -a $GITHUB_STEP_SUMMARY
+            echo 0
+          fi
