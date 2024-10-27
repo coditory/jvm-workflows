@@ -39,6 +39,10 @@ jobs:
       skipped: ${{ steps.skipper.outputs.skip }}
     # Skip duplicate build on pull_request if pull request uses branch from the same repository
     if: github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name
+    # One run per branch at a time and cancel the one in-progress
+    concurrency:
+      group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Context
         if: inputs.debug
