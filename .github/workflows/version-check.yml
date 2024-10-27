@@ -81,9 +81,11 @@ jobs:
         run: |
           if [ "$PROJECT_VERSION" == "$GIT_VERSION" ]; then
             echo "Project and git versions matches. All is good!" | tee -a $GITHUB_STEP_SUMMARY
+            echo "Project version: $PROJECT_VERSION" | tee -a $GITHUB_STEP_SUMMARY
+            echo "Git version: $GIT_VERSION" | tee -a $GITHUB_STEP_SUMMARY
           else
             echo "Error: Project and git versions do not match." | tee -a $GITHUB_STEP_SUMMARY
             echo "Project version: $PROJECT_VERSION" | tee -a $GITHUB_STEP_SUMMARY
             echo "Git version: $GIT_VERSION" | tee -a $GITHUB_STEP_SUMMARY
-            echo 0
+            exit 1
           fi
