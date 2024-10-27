@@ -62,7 +62,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          check-prev-workflow-status: true
           skip-commit-messages: '[ci-skip-build]'
           skip-files: ${{ inputs.skip-files }}
 
