@@ -29,14 +29,26 @@ on:
       snapshot-command:
         type: string
         required: false
+      debug:
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   coditory-jvm-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      skipped: ${{ steps.skipper.outputs.skip }}
     # Skip duplicate build on pull_request if pull request uses branch from the same repository
     if: github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name
     steps:
+      - name: Context
+        if: inputs.debug
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -91,29 +103,29 @@ jobs:
           disable_search: true
           files: ${{ inputs.coverage-files }}
 
-      - name: Version
-        id: version
-        if: |
-          steps.skipper.outputs.skip != 'true'
-          && github.snapshot-command != ''
-          && github.event_name == 'push'
-          && (github.ref_name == github.event.repository.default_branch || (startsWith(github.ref_name, 'v') && endsWith(github.ref_name, '.x.x')))
-        uses: coditory/version-action@v1
-        with:
-          snapshot: true
+      # - name: Version
+      #   id: version
+      #   if: |
+      #     steps.skipper.outputs.skip != 'true'
+      #     && github.snapshot-command != ''
+      #     && github.event_name == 'push'
+      #     && (github.ref_name == github.event.repository.default_branch || (startsWith(github.ref_name, 'v') && endsWith(github.ref_name, '.x.x')))
+      #   uses: coditory/version-action@v1
+      #   with:
+      #     snapshot: true
 
-      - name: Publish Snapshot
-        if: steps.version.outcome == 'success'
-        # Publishing to maven central sometimes fails
-        continue-on-error: true
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          NEXT_VERSION: ${{ steps.version.outputs.next_version }}
-          SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          SIGNING_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          OSSRH_STAGING_PROFILE_ID: ${{ secrets.OSSRH_STAGING_PROFILE_ID }}
-        run: |
-          ${{ inputs.snapshot-command }}
-          echo "Published snapshot version $NEXT_VERSION 🚀" | tee -a $GITHUB_STEP_SUMMARY
+      # - name: Publish Snapshot
+      #   if: steps.version.outcome == 'success'
+      #   # Publishing to maven central sometimes fails
+      #   continue-on-error: true
+      #   env:
+      #     GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      #     NEXT_VERSION: ${{ steps.version.outputs.next_version }}
+      #     SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      #     SIGNING_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+      #     OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+      #     OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+      #     OSSRH_STAGING_PROFILE_ID: ${{ secrets.OSSRH_STAGING_PROFILE_ID }}
+      #   run: |
+      #     ${{ inputs.snapshot-command }}
+      #     echo "Published snapshot version $NEXT_VERSION 🚀" | tee -a $GITHUB_STEP_SUMMARY
