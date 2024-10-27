@@ -45,6 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          check-prev-workflow-status: ${{ github.event_name == 'push' }}
           skip-commit-messages: '[ci-skip-build]'
           files: gradle.properties
 
