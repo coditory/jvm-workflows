@@ -16,6 +16,10 @@ on:
         description: 'Gradle distribution. Default upgrade ditribution is the current distribution.'
         type: string
         required: false
+      debug:
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   coditory-upgrade-gradle-wrapper:

@@ -26,9 +26,6 @@ on:
           ^.github/.*\.md
           ^docs/.*
           ^gradle.properties
-      snapshot-command:
-        type: string
-        required: false
       debug:
         type: boolean
         required: false
@@ -103,29 +100,3 @@ jobs:
           disable_search: true
           files: ${{ inputs.coverage-files }}
 
-      # - name: Version
-      #   id: version
-      #   if: |
-      #     steps.skipper.outputs.skip != 'true'
-      #     && github.snapshot-command != ''
-      #     && github.event_name == 'push'
-      #     && (github.ref_name == github.event.repository.default_branch || (startsWith(github.ref_name, 'v') && endsWith(github.ref_name, '.x.x')))
-      #   uses: coditory/version-action@v1
-      #   with:
-      #     snapshot: true
-
-      # - name: Publish Snapshot
-      #   if: steps.version.outcome == 'success'
-      #   # Publishing to maven central sometimes fails
-      #   continue-on-error: true
-      #   env:
-      #     GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-      #     NEXT_VERSION: ${{ steps.version.outputs.next_version }}
-      #     SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-      #     SIGNING_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-      #     OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-      #     OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-      #     OSSRH_STAGING_PROFILE_ID: ${{ secrets.OSSRH_STAGING_PROFILE_ID }}
-      #   run: |
-      #     ${{ inputs.snapshot-command }}
-      #     echo "Published snapshot version $NEXT_VERSION 🚀" | tee -a $GITHUB_STEP_SUMMARY
