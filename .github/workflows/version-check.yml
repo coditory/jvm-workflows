@@ -63,9 +63,9 @@ jobs:
         id: project
         if: steps.skipper.outputs.skip != 'true'
         run: |
-          declare -r versionCmd="${{ inputs.version-command }}"
-          echo -e "Using command to get project version:\n$versionCmd"
-          declare -r version="$($versionCmd)"
+          # Print command before assigning to skip gradle download logs
+          ${{ inputs.version-command }}
+          declare -r version="$(${{ inputs.version-command }})"
           echo "version=$version" | tee -a $GITHUB_OUTPUT
 
       - name: Git version
