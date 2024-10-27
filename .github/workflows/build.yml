@@ -56,7 +56,7 @@ jobs:
           # required at least two commits for proper working of the skip job
           fetch-depth: 2
 
-      - name: Skip build if not needed
+      - name: Skip if not needed
         id: skipper
         uses: coditory/skip-action@v1
         env:

@@ -38,7 +38,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 100
 
-      - name: Skip build if not needed
+      - name: Skip if not needed
         id: skipper
         uses: coditory/skip-action@v1
         env:
