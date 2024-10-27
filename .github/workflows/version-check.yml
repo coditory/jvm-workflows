@@ -63,8 +63,8 @@ jobs:
         if: steps.skipper.outputs.skip != 'true'
         run: |
           declare -r versionCmd="${{ inputs.version-command }}"
-          echo "Using command to get project version:\n$versionCmd"
-          declare -r version="$($cmd)"
+          echo -e "Using command to get project version:\n$versionCmd"
+          declare -r version="$($versionCmd)"
           echo "version=$version" | tee -a $GITHUB_OUTPUT
 
       - name: Git version
