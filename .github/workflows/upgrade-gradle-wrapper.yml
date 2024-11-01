@@ -7,6 +7,7 @@ on:
         description: 'Java version'
         type: string
         required: false
+        default: '21'
       java-distribution:
         description: 'Java distribution'
         type: string
