@@ -8,7 +8,7 @@ on:
 
 jobs:
   check:
-    uses: coditory/workflows/.github/workflows/release-auto-check.yml@v1
+    uses: coditory/workflows/.github/workflows/release-check.yml@v1
     secrets: inherit
 
   auto-release:
