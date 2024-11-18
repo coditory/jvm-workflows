@@ -91,7 +91,7 @@ jobs:
         run: ${{ inputs.build-command }}
 
       - name: Publish Coverage Report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         continue-on-error: true
         # Publish coverage only for the default branch
         if: |
